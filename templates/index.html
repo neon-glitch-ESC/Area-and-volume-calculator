@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shape Calculator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body data-theme="light">
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <span class="logo">📐 Shape Calculator</span>
+        </div>
+        <div class="top-bar-right">
+            <div class="tool-group">
+                <label for="precision">Precision</label>
+                <select id="precision">
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2" selected>2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+            </div>
+            <div class="tool-group">
+                <label for="unit">Unit</label>
+                <select id="unit">
+                    <option value="1">m</option>
+                    <option value="100">cm</option>
+                    <option value="39.37">in</option>
+                    <option value="3.281">ft</option>
+                </select>
+            </div>
+            <div class="tool-group">
+                <label>&nbsp;</label>
+                <button id="copyBtn" class="icon-btn" title="Copy last result">📋</button>
+                <button id="darkToggle" class="icon-btn" title="Toggle theme">🌙</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="layout">
+        <div class="main">
+            <header>
+                <h1>Shape Calculator</h1>
+                <p>Select a shape, enter dimensions, get instant results</p>
+            </header>
+
+            <div class="shape-diagram" id="shapeDiagram"></div>
+
+            <div class="card">
+                <form method="POST" action="/" id="shapeForm">
+                    <div class="form-group">
+                        <label for="shape">Choose a shape</label>
+                        <select name="shape" id="shape" onchange="onShapeChange()">
+                            <optgroup label="2D Shapes">
+                                <option value="rectangle" {{ 'selected' if selected_shape == 'rectangle' else '' }}>Rectangle</option>
+                                <option value="square" {{ 'selected' if selected_shape == 'square' else '' }}>Square</option>
+                                <option value="circle" {{ 'selected' if selected_shape == 'circle' else '' }}>Circle</option>
+                                <option value="triangle" {{ 'selected' if selected_shape == 'triangle' else '' }}>Triangle</option>
+                                <option value="equilateral_triangle" {{ 'selected' if selected_shape == 'equilateral_triangle' else '' }}>Equilateral Triangle</option>
+                            </optgroup>
+                            <optgroup label="3D Shapes">
+                                <option value="cube" {{ 'selected' if selected_shape == 'cube' else '' }}>Cube</option>
+                                <option value="cuboid" {{ 'selected' if selected_shape == 'cuboid' else '' }}>Cuboid</option>
+                                <option value="cone" {{ 'selected' if selected_shape == 'cone' else '' }}>Cone</option>
+                                <option value="cylinder" {{ 'selected' if selected_shape == 'cylinder' else '' }}>Cylinder</option>
+                                <option value="prism" {{ 'selected' if selected_shape == 'prism' else '' }}>Prism (Triangular)</option>
+                                <option value="square_pyramid" {{ 'selected' if selected_shape == 'square_pyramid' else '' }}>Square Pyramid</option>
+                                <option value="triangular_pyramid" {{ 'selected' if selected_shape == 'triangular_pyramid' else '' }}>Triangular Pyramid</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div id="presetButtons" class="preset-row"></div>
+
+                    <div id="inputGroups">
+                        <!-- Rectangle -->
+                        <div class="input-group inputs-rectangle">
+                            <h3>Rectangle</h3>
+                            <div class="input-row">
+                                <input type="number" step="any" name="length" placeholder="Length">
+                                <input type="number" step="any" name="breadth" placeholder="Breadth">
+                            </div>
+                        </div>
+                        <!-- Square -->
+                        <div class="input-group inputs-square">
+                            <h3>Square</h3>
+                            <div class="input-row">
+                                <input type="number" step="any" name="side" placeholder="Side">
+                            </div>
+                        </div>
+                        <!-- Circle -->
+                        <div class="input-group inputs-circle">
+                            <h3>Circle</h3>
+                            <div class="input-row">
+                                <input type="number" step="any" name="radius" placeholder="Radius">
+                            </div>
+                        </div>
+                        <!-- Triangle -->
+                        <div class="input-group inputs-triangle">
+                            <h3>Triangle</h3>
+                            <div class="input-row three-inputs">
+                                <input type="number" step="any" name="side1" placeholder="Side a">
+                                <input type="number" step="any" name="side2" placeholder="Side b">
+                                <input type="number" step="any" name="side3" placeholder="Side c">
+                            </div>
+                        </div>
+                        <!-- Equilateral Triangle -->
+                        <div class="input-group inputs-equilateral_triangle">
+                            <h3>Equilateral Triangle</h3>
+                            <div class="input-row">
+                                <input type="number" step="any" name="side" placeholder="Side">
+                            </div>
+                        </div>
+                        <!-- Cube -->
+                        <div class="input-group inputs-cube">
+                            <h3>Cube</h3>
+                            <div class="input-row">
+                                <input type="number" step="any" name="side" placeholder="Side">
+                            </div>
+                        </div>
+                        <!-- Cuboid -->
+                        <div class="input-group inputs-cuboid">
+                            <h3>Cuboid</h3>
+                            <div class="input-row three-inputs">
+                                <input type="number" step="any" name="length" placeholder="Length">
+                                <input type="number" step="any" name="breadth" placeholder="Breadth">
+                                <input type="number" step="any" name="height" placeholder="Height">
+                            </div>
+                        </div>
+                        <!-- Cone -->
+                        <div class="input-group inputs-cone">
+                            <h3>Cone</h3>
+                            <div class="input-row">
+                                <input type="number" step="any" name="radius" placeholder="Radius">
+                                <input type="number" step="any" name="height" placeholder="Height">
+                            </div>
+                        </div>
+                        <!-- Cylinder -->
+                        <div class="input-group inputs-cylinder">
+                            <h3>Cylinder</h3>
+                            <div class="input-row">
+                                <input type="number" step="any" name="radius" placeholder="Radius">
+                                <input type="number" step="any" name="height" placeholder="Height">
+                            </div>
+                        </div>
+                        <!-- Prism -->
+                        <div class="input-group inputs-prism">
+                            <h3>Prism (Triangular Base)</h3>
+                            <div class="input-row three-inputs">
+                                <input type="number" step="any" name="side_a" placeholder="Base side a">
+                                <input type="number" step="any" name="side_b" placeholder="Base side b">
+                                <input type="number" step="any" name="side_c" placeholder="Base side c">
+                            </div>
+                            <div class="input-row" style="margin-top:10px">
+                                <input type="number" step="any" name="height" placeholder="Prism height">
+                            </div>
+                        </div>
+                        <!-- Square Pyramid -->
+                        <div class="input-group inputs-square_pyramid">
+                            <h3>Square Pyramid</h3>
+                            <div class="input-row">
+                                <input type="number" step="any" name="side" placeholder="Base side">
+                                <input type="number" step="any" name="height" placeholder="Height">
+                            </div>
+                        </div>
+                        <!-- Triangular Pyramid -->
+                        <div class="input-group inputs-triangular_pyramid">
+                            <h3>Triangular Pyramid (Tetrahedron)</h3>
+                            <div class="input-row">
+                                <input type="number" step="any" name="side" placeholder="Edge length">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn" id="calcBtn">
+                        <span id="btnText">Calculate</span>
+                        <span id="btnSpinner" class="spinner hidden">⟳</span>
+                    </button>
+                </form>
+            </div>
+
+            <div id="resultContainer" class="result-card {% if not result %}hidden{% endif %}">
+                <div class="result-header">
+                    <h2 id="resultTitle">
+                        {% if result and result.type == '3d' %}
+                            CSA / LSA · TSA · Volume
+                        {% elif result %}
+                            Area &amp; Perimeter
+                        {% endif %}
+                    </h2>
+                    <button id="copyResultBtn" class="icon-btn-sm" title="Copy results">📋</button>
+                </div>
+                <div id="resultBody">
+                    {% if result and result.error %}
+                        <p class="error">{{ result.error }}</p>
+                    {% elif result %}
+                        <div class="result-row" id="resultRow">
+                            {% for item in result.rows %}
+                            <div class="result-item result-fade-in">
+                                <span class="result-label">{{ item[0] }}</span>
+                                <span class="result-fv">{{ "%.2f"|format(item[1]) }}</span>
+                                <span class="result-unit">{{ item[2] }}</span>
+                                {% if result.formulas and item[0] in result.formulas %}
+                                <span class="result-formula">{{ result.formulas[item[0]] }}</span>
+                                {% endif %}
+                            </div>
+                            {% if not loop.last %}
+                            <div class="result-divider"></div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>Shape Calculator — Ctrl+Enter to calculate, Escape to clear</p>
+    </footer>
+
+    <script>
+        /* =========================================================
+           SHAPE LABELS (for diagram titles, presets)
+           ========================================================= */
+        var SHAPE_LABELS = {
+            rectangle: 'Rectangle', square: 'Square', circle: 'Circle',
+            triangle: 'Triangle', equilateral_triangle: 'Equilateral Triangle',
+            cube: 'Cube', cuboid: 'Cuboid', cone: 'Cone', cylinder: 'Cylinder',
+            prism: 'Prism (Triangular)', square_pyramid: 'Square Pyramid',
+            triangular_pyramid: 'Triangular Pyramid'
+        };
+
+        var PRESETS = {
+            rectangle:        { length: 5, breadth: 3 },
+            square:           { side: 4 },
+            circle:           { radius: 7 },
+            triangle:         { side1: 3, side2: 4, side3: 5 },
+            equilateral_triangle: { side: 6 },
+            cube:             { side: 3 },
+            cuboid:           { length: 4, breadth: 3, height: 2 },
+            cone:             { radius: 3, height: 4 },
+            cylinder:         { radius: 5, height: 10 },
+            prism:            { side_a: 3, side_b: 4, side_c: 5, height: 10 },
+            square_pyramid:   { side: 6, height: 4 },
+            triangular_pyramid: { side: 4 }
+        };
+
+        /* =========================================================
+           SVG DIAGRAMS
+           ========================================================= */
+        function getShapeSVG(shape) {
+            var SVG_FILL = 'var(--diagram-fill)';
+        var svgs = {
+                rectangle: '<svg viewBox="0 0 120 80"><rect x="10" y="10" width="100" height="60" fill="none" stroke="currentColor" stroke-width="2.5" rx="3"/><line x1="10" y1="10" x2="55" y2="10" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4,2"/><text x="30" y="24" font-size="10" fill="var(--accent)" text-anchor="middle">l</text><line x1="10" y1="10" x2="10" y2="45" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4,2"/><text x="20" y="55" font-size="10" fill="var(--accent)" text-anchor="middle">b</text></svg>',
+                square: '<svg viewBox="0 0 120 80"><rect x="20" y="10" width="60" height="60" fill="none" stroke="currentColor" stroke-width="2.5" rx="3"/><line x1="20" y1="10" x2="55" y2="10" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4,2"/><text x="38" y="24" font-size="10" fill="var(--accent)" text-anchor="middle">s</text><line x1="20" y1="10" x2="20" y2="45" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4,2"/><text x="30" y="55" font-size="10" fill="var(--accent)" text-anchor="middle">s</text></svg>',
+                circle: '<svg viewBox="0 0 120 80"><circle cx="60" cy="40" r="30" fill="none" stroke="currentColor" stroke-width="2.5"/><line x1="60" y1="40" x2="88" y2="40" stroke="var(--accent)" stroke-width="1.5"/><text x="74" y="36" font-size="10" fill="var(--accent)" text-anchor="middle">r</text></svg>',
+                triangle: '<svg viewBox="0 0 120 80"><polygon points="60,8 12,72 108,72" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><text x="60" y="66" font-size="9" fill="var(--accent)" text-anchor="middle">a</text><text x="20" y="56" font-size="9" fill="var(--accent)" text-anchor="middle">b</text><text x="100" y="56" font-size="9" fill="var(--accent)" text-anchor="middle">c</text></svg>',
+                equilateral_triangle: '<svg viewBox="0 0 120 80"><polygon points="60,8 12,72 108,72" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><text x="60" y="66" font-size="10" fill="var(--accent)" text-anchor="middle">s</text><text x="60" y="28" font-size="10" fill="var(--accent)" text-anchor="middle">s</text><text x="16" y="56" font-size="10" fill="var(--accent)" text-anchor="middle">s</text></svg>',
+                cube: '<svg viewBox="0 0 120 90"><polygon points="30,15 90,15 110,35 50,35" fill="' + SVG_FILL + '" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><polygon points="30,15 50,35 50,75 30,55" fill="' + SVG_FILL + '" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><polygon points="50,35 110,35 110,75 50,75" fill="' + SVG_FILL + '" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="60" y="58" font-size="10" fill="var(--accent)" text-anchor="middle">s</text></svg>',
+                cuboid: '<svg viewBox="0 0 120 90"><polygon points="20,15 100,15 115,30 35,30" fill="' + SVG_FILL + '" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><polygon points="20,15 35,30 35,75 20,60" fill="' + SVG_FILL + '" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><polygon points="35,30 115,30 115,75 35,75" fill="' + SVG_FILL + '" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="42" y="65" font-size="9" fill="var(--accent)" text-anchor="middle">h</text><text x="75" y="72" font-size="9" fill="var(--accent)" text-anchor="middle">l</text><text x="100" y="55" font-size="9" fill="var(--accent)" text-anchor="middle">b</text></svg>',
+                cone: '<svg viewBox="0 0 120 90"><ellipse cx="60" cy="72" rx="35" ry="8" fill="' + SVG_FILL + '" stroke="currentColor" stroke-width="2"/><line x1="25" y1="72" x2="60" y2="12" stroke="currentColor" stroke-width="2"/><line x1="95" y1="72" x2="60" y2="12" stroke="currentColor" stroke-width="2"/><text x="54" y="48" font-size="10" fill="var(--accent)" text-anchor="middle">h</text><text x="70" y="70" font-size="10" fill="var(--accent)" text-anchor="middle">r</text></svg>',
+                cylinder: '<svg viewBox="0 0 120 90"><ellipse cx="60" cy="18" rx="35" ry="8" fill="' + SVG_FILL + '" stroke="currentColor" stroke-width="2"/><ellipse cx="60" cy="72" rx="35" ry="8" fill="' + SVG_FILL + '" stroke="currentColor" stroke-width="2"/><line x1="25" y1="18" x2="25" y2="72" stroke="currentColor" stroke-width="2"/><line x1="95" y1="18" x2="95" y2="72" stroke="currentColor" stroke-width="2"/><text x="58" y="48" font-size="10" fill="var(--accent)" text-anchor="middle">h</text><text x="78" y="16" font-size="10" fill="var(--accent)" text-anchor="middle">r</text></svg>',
+                prism: '<svg viewBox="0 0 120 90"><polygon points="22,60 90,60 112,40 60,20" fill="' + SVG_FILL + '" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><line x1="22" y1="60" x2="22" y2="80" stroke="currentColor" stroke-width="2"/><line x1="90" y1="60" x2="90" y2="80" stroke="currentColor" stroke-width="2"/><line x1="112" y1="40" x2="112" y2="60" stroke="currentColor" stroke-width="2"/><line x1="60" y1="20" x2="60" y2="40" stroke="currentColor" stroke-width="2"/><polygon points="22,80 90,80 112,60 60,40" fill="' + SVG_FILL + '" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="55" y="72" font-size="9" fill="var(--accent)" text-anchor="middle">h</text></svg>',
+                square_pyramid: '<svg viewBox="0 0 120 90"><polygon points="60,10 20,70 100,70" fill="' + SVG_FILL + '" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><polygon points="20,70 100,70 100,82 20,82" fill="' + SVG_FILL + '" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><line x1="100" y1="70" x2="60" y2="10" stroke="currentColor" stroke-width="2"/><line x1="20" y1="70" x2="60" y2="10" stroke="currentColor" stroke-width="2"/><text x="58" y="50" font-size="10" fill="var(--accent)" text-anchor="middle">h</text><text x="62" y="80" font-size="10" fill="var(--accent)" text-anchor="middle">s</text></svg>',
+                triangular_pyramid: '<svg viewBox="0 0 120 90"><polygon points="60,12 20,72 100,72" fill="' + SVG_FILL + '" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><line x1="60" y1="12" x2="40" y2="40" stroke="currentColor" stroke-width="2"/><line x1="60" y1="12" x2="80" y2="40" stroke="currentColor" stroke-width="2"/><line x1="40" y1="40" x2="80" y2="40" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3,3"/><text x="60" y="58" font-size="10" fill="var(--accent)" text-anchor="middle">s</text></svg>'
+            };
+            return svgs[shape] || '';
+        }
+
+        /* =========================================================
+           DARK MODE
+           ========================================================= */
+        function initTheme() {
+            var t = localStorage.getItem('shapeCalcTheme') || 'light';
+            document.body.setAttribute('data-theme', t);
+            document.getElementById('darkToggle').textContent = t === 'dark' ? '☀️' : '🌙';
+        }
+        document.getElementById('darkToggle').addEventListener('click', function() {
+            var cur = document.body.getAttribute('data-theme');
+            var next = cur === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', next);
+            localStorage.setItem('shapeCalcTheme', next);
+            this.textContent = next === 'dark' ? '☀️' : '🌙';
+            updateDiagram();
+        });
+
+        /* =========================================================
+           PRECISION
+           ========================================================= */
+        function getPrecision() {
+            return parseInt(document.getElementById('precision').value);
+        }
+
+        /* =========================================================
+           UNIT LABEL
+           ========================================================= */
+        function getUnitLabel() {
+            var sel = document.getElementById('unit');
+            return sel.options[sel.selectedIndex].text;
+        }
+
+        /* =========================================================
+           TOGGLE INPUTS + DIAGRAM + PRESETS
+           ========================================================= */
+        function onShapeChange() {
+            toggleInputs();
+            updateDiagram();
+            updatePresets();
+        }
+
+        function toggleInputs() {
+            var shape = document.getElementById('shape').value;
+            var groups = document.querySelectorAll('.input-group');
+            for (var i = 0; i < groups.length; i++) {
+                groups[i].classList.remove('active');
+                var inputs = groups[i].querySelectorAll('input');
+                for (var j = 0; j < inputs.length; j++) {
+                    inputs[j].disabled = true;
+                }
+            }
+            var active = document.querySelector('.inputs-' + shape);
+            if (active) {
+                active.classList.add('active');
+                var activeInputs = active.querySelectorAll('input');
+                for (var j = 0; j < activeInputs.length; j++) {
+                    activeInputs[j].disabled = false;
+                }
+            }
+        }
+
+        function updateDiagram() {
+            var shape = document.getElementById('shape').value;
+            var div = document.getElementById('shapeDiagram');
+            var svg = getShapeSVG(shape);
+            div.innerHTML = svg ? '<figure>' + svg + '<figcaption>' + (SHAPE_LABELS[shape] || shape) + '</figcaption></figure>' : '';
+        }
+
+        function updatePresets() {
+            var shape = document.getElementById('shape').value;
+            var container = document.getElementById('presetButtons');
+            var p = PRESETS[shape];
+            if (!p) { container.innerHTML = ''; return; }
+            container.innerHTML = '<button type="button" class="preset-btn" onclick="fillPreset(\'' + shape + '\')">Try example ❯</button>';
+        }
+
+        function fillPreset(shape) {
+            var vals = PRESETS[shape];
+            if (!vals) return;
+            for (var key in vals) {
+                if (vals.hasOwnProperty(key)) {
+                    var inp = document.querySelector('input[name="' + key + '"]');
+                    if (inp && !inp.disabled) inp.value = vals[key];
+                }
+            }
+            doCalculate();
+        }
+
+        /* =========================================================
+           RENDER RESULT
+           ========================================================= */
+        function fmt(val) {
+            var p = getPrecision();
+            var u = getUnitLabel();
+            // unit label display only — the value is the raw computed value
+            return parseFloat(val).toFixed(p);
+        }
+
+        function renderResult(data) {
+            var container = document.getElementById('resultContainer');
+            var title = document.getElementById('resultTitle');
+            var body = document.getElementById('resultBody');
+
+            container.classList.remove('hidden');
+
+            if (data.error) {
+                title.textContent = 'Results';
+                body.innerHTML = '<p class="error">' + data.error + '</p>';
+                return;
+            }
+
+            title.innerHTML = data.type === '3d'
+                ? 'CSA / LSA \u00b7 TSA \u00b7 Volume'
+                : 'Area \u0026 Perimeter';
+
+            var unitLabel = getUnitLabel();
+
+            var html = '<div class="result-row">';
+            for (var i = 0; i < data.rows.length; i++) {
+                var row = data.rows[i];
+                var label = row[0];
+                var val = row[1];
+                var unit = row[2];
+                var formula = (data.formulas && data.formulas[label]) ? data.formulas[label] : '';
+
+                var displayUnit = unit.replace('sq units', 'sq ' + unitLabel).replace('cu units', 'cu ' + unitLabel).replace('units', unitLabel);
+
+                html += '<div class="result-item result-fade-in" style="animation-delay:' + (i * 0.08) + 's">';
+                html += '<span class="result-label">' + label + '</span>';
+                html += '<span class="result-fv">' + fmt(val) + '</span>';
+                html += '<span class="result-unit">' + displayUnit + '</span>';
+                if (formula) {
+                    html += '<span class="result-formula">' + formula + '</span>';
+                }
+                html += '</div>';
+                if (i < data.rows.length - 1) {
+                    html += '<div class="result-divider"></div>';
+                }
+            }
+            html += '</div>';
+            body.innerHTML = html;
+        }
+
+        /* =========================================================
+           COPY
+           ========================================================= */
+        document.getElementById('copyResultBtn').addEventListener('click', function() {
+            var body = document.getElementById('resultBody');
+            var text = body.textContent || body.innerText;
+            if (text.trim()) {
+                navigator.clipboard.writeText(text.trim()).catch(function() {});
+            }
+        });
+        document.getElementById('copyBtn').addEventListener('click', function() {
+            document.getElementById('copyResultBtn').click();
+        });
+
+        /* =========================================================
+           DO CALCULATE (shared between button and real-time)
+           ========================================================= */
+        function doCalculate() {
+            var shape = document.getElementById('shape').value;
+            var active = document.querySelector('.inputs-' + shape);
+            if (!active) return;
+            var inputs = active.querySelectorAll('input');
+            var valid = true;
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i].value.trim() === '') {
+                    inputs[i].style.borderColor = 'var(--error)';
+                    valid = false;
+                } else {
+                    inputs[i].style.borderColor = '';
+                }
+            }
+            if (!valid) {
+                alert('Please fill in all fields for ' + shape.replace('_', ' ') + '.');
+                return;
+            }
+
+            var btnText = document.getElementById('btnText');
+            var spinner = document.getElementById('btnSpinner');
+            btnText.textContent = 'Calculating…';
+            spinner.classList.remove('hidden');
+
+            var form = document.getElementById('shapeForm');
+            var formData = new FormData(form);
+
+            fetch('/calculate', {
+                method: 'POST',
+                body: formData
+            })
+            .then(function(r) {
+                if (!r.ok) {
+                    return r.text().then(function(t) {
+                        throw new Error('HTTP ' + r.status + ': ' + t.substring(0, 100));
+                    });
+                }
+                return r.json();
+            })
+            .then(function(data) {
+                renderResult(data);
+                btnText.textContent = 'Calculate';
+                spinner.classList.add('hidden');
+            })
+            .catch(function(err) {
+                console.error('Calc error:', err);
+                renderResult({error: 'Server error: ' + (err.message || 'Please try again.')});
+                btnText.textContent = 'Calculate';
+                spinner.classList.add('hidden');
+            });
+        }
+
+        /* =========================================================
+           FORM SUBMIT (AJAX)
+           ========================================================= */
+        document.getElementById('shapeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            doCalculate();
+        });
+
+        /* =========================================================
+           REAL-TIME CALCULATION (debounced)
+           ========================================================= */
+        var debounceTimer = null;
+        document.addEventListener('input', function(e) {
+            if (e.target.tagName === 'INPUT' && e.target.form && e.target.form.id === 'shapeForm') {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(function() {
+                    var shape = document.getElementById('shape').value;
+                    var active = document.querySelector('.inputs-' + shape);
+                    if (!active) return;
+                    var inputs = active.querySelectorAll('input');
+                    var allFilled = true;
+                    for (var i = 0; i < inputs.length; i++) {
+                        if (inputs[i].value.trim() === '') { allFilled = false; break; }
+                    }
+                    if (allFilled) doCalculate();
+                }, 400);
+            }
+        });
+
+        /* =========================================================
+           KEYBOARD SHORTCUTS
+           ========================================================= */
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+Enter or Cmd+Enter to calculate
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                doCalculate();
+            }
+            // Escape to clear all inputs
+            if (e.key === 'Escape') {
+                var inputs = document.querySelectorAll('#inputGroups input');
+                for (var i = 0; i < inputs.length; i++) {
+                    inputs[i].value = '';
+                    inputs[i].style.borderColor = '';
+                }
+            }
+        });
+
+        /* =========================================================
+           SHAREABLE URL — restore from query string
+           ========================================================= */
+        function restoreFromURL() {
+            var params = new URLSearchParams(window.location.search);
+            var shape = params.get('shape');
+            if (shape && document.querySelector('option[value="' + shape + '"]')) {
+                document.getElementById('shape').value = shape;
+                // wait for inputs to toggle
+                setTimeout(function() {
+                    onShapeChange();
+                    // fill values
+                    for (var key of params.keys()) {
+                        if (key === 'shape') continue;
+                        var inp = document.querySelector('input[name="' + key + '"]');
+                        if (inp && !inp.disabled) inp.value = params.get(key);
+                    }
+                    // auto-calculate
+                    doCalculate();
+                }, 50);
+            }
+        }
+
+        /* =========================================================
+           INIT
+           ========================================================= */
+        window.addEventListener('DOMContentLoaded', function() {
+            initTheme();
+            toggleInputs();
+            updateDiagram();
+            updatePresets();
+            restoreFromURL();
+            // update URL when shape changes (for shareability)
+            document.getElementById('shape').addEventListener('change', function() {
+                var url = new URL(window.location);
+                url.searchParams.set('shape', this.value);
+                window.history.replaceState({}, '', url);
+            });
+        });
+
+    </script>
+</body>
+</html>
