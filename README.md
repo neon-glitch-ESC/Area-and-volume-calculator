@@ -51,15 +51,17 @@ A web-based Geometry Calculator built using Python and Flask that calculates are
 ## 📂 Project Structure
 
 ```txt
-../
+shape_calculator_flask/
 │
 ├── static/
-│   └── style.css
+│   ├── style.css
+│   └── images/
+|       └── preview.png
 │
 ├── templates/
 │   └── index.html
 │
-└── app.py
+├── app.py
 ```
 
 ---
